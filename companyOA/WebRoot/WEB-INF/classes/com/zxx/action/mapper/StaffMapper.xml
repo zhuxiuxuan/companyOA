@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zxx.dao.impl.StaffDaoImpl">
+	<resultMap type="com.zxx.entity.Staff" id="StaffMap">
+			<id property="staff_id" column="staff_id"/>
+			<result property="staff_name" column="staff_name"/>
+			<result property="staff_pwd" column="staff_pwd"/>
+			<result property="staff_infoid" column="staff_info"/>
+			<result property="staff_level" column="staff_level"/>
+			<association property="staff_info" column="info_id" javaType="com.zxx.entity.StaffInfo">
+			<id property="info_id" column="info_id"/>
+			<result property="info_name" column="info_name"/>
+			<result property="info_photo" column="info_photo"/>
+			<result property="info_entry" column="info_entry"/>
+			<result property="info_phone" column="info_phone"/>
+			<result property="info_WeChat" column="info_WeChat"/>
+			<result property="staff_level" column="staff_level"/>
+			<result property="info_WeChat" column="info_WeChat"/>
+			<result property="info_departmentId" column="info_department"/>
+			<result property="info_positionId" column="info_position"/>
+			<association property="info_department" column="d_id" javaType="com.zxx.entity.Department">
+				<id property="d_id" column="d_id"/>
+				<result property="d_name" column="d_name"/>
+			</association>
+			<association property="info_position" column="p_id" javaType="com.zxx.entity.Position">
+				<id property="p_id" column="p_id"/>
+				<result property="p_name" column="p_name"/>
+			</association>
+			</association>
+	</resultMap>
+	<select id="findStaffCount" resultType="int" parameterType="map">
+  		<!-- 这里的SQL结尾不能加分号，否则报"ORA-00911错误" -->
+  		SELECT count(*) FROM staff_info where staff_level != '-1' 
+  			<if test="findByDEP != null and '' != findByDEP">
+  				and info_department = #{findByDEP}
+  			</if>
+  	</select>
+	<select id="find" resultMap="StaffMap" parameterType="map">
+		select * from staff s left join staff_info i on s.staff_info = info_id LEFT JOIN department d on i.info_department = d.d_id LEFT JOIN position p on i.info_position = p.p_id 
+		
+		<where>
+			<if test="staffName != null and '' != staffName">
+				staff_name = #{staffName}
+			</if>
+			<if test="staffPwd != null and '' != staffPwd">
+				and staff_pwd = #{staffPwd} 
+			</if>
+			<if test="staffLevel !=null and '' != staffLevel">
+				and s.staff_level = #{staffLevel} 
+			</if>
+			<if test="staffDepartment !=null and '' != staffDepartment">
+				and i.info_department = #{staffDepartment}
+			</if>
+			<if test="findByDEP != null and '' != findByDEP">
+  				and info_department = #{findByDEP}
+  			</if>
+  			<if test="pageFind != null and '' != pageFind">
+				and s.staff_level != '-1'
+			</if>
+		</where>
+		<if test="pageFind != null and '' != pageFind">
+		 limit #{bin},#{pageSize}
+		</if>
+		</select>
+	<select id="findModules" resultType="com.zxx.entity.Modules" parameterType="int">
+		select * from Module where FIND_IN_SET(#{module_level},module_level)
+	</select>
+	<insert id="addStaffInfo" parameterType="com.zxx.entity.StaffInfo">
+		insert into staff_info(info_id,info_name,info_photo,info_department,info_position,info_entry,info_phone,info_WeChat,staff_level,c_date) 
+		values(#{info_id},#{info_name},#{info_photo},#{info_departmentId},#{info_positionId},#{info_entry},#{info_phone},#{info_WeChat},#{staff_level},#{creation_date})
+	</insert>
+	<insert id="add" parameterType="com.zxx.entity.Staff">
+		insert into staff(staff_id,staff_name,staff_pwd,staff_info,staff_level) 
+		values(#{staff_id},#{staff_name},#{staff_pwd},#{staff_infoid},#{staff_level})
+	</insert>
+	<update id="update" parameterType="com.zxx.entity.StaffInfo">
+		update staff_info set info_name = #{info_name},info_photo = #{info_photo},info_department = #{info_departmentId},info_position = #{info_positionId},info_entry = #{info_entry},info_phone = #{info_phone},info_WeChat = #{info_WeChat} WHERE info_id = #{info_id}
+	</update>
+	<delete id="delete" parameterType="string">
+		DELETE staff,staff_info FROM staff_info LEFT JOIN staff on staff.staff_info = staff_info.info_id  WHERE staff_info.info_id = #{info_id} 
+	</delete>
+	<update id="updateStaff" parameterType="com.zxx.entity.Staff">
+		<if test="staff_level != null and '' != staff_level">
+		update staff s,staff_info i set s.staff_level = #{staff_level},i.staff_level = #{staff_level} where i.info_id = #{staff_infoid} and s.staff_info = #{staff_infoid}
+		</if>
+		<if test="staff_pwd != null and '' != staff_pwd">
+		 update staff set staff_pwd = #{staff_pwd} where staff_info = #{staff_infoid}
+		</if>
+		</update>
+ </mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+<!-- 要注意Struts2默认文件上传最大为2M即便你设置了<param name="maximumSize">5242880</param>
+          当上传的文件大于2M时候也会出错的这时要设置，另外一个常量
+    <constant name="struts.multipart.maxSize" value="1000000000"/> -->
+	<package name="staff" namespace="/staff" extends="json-default">
+		<action name="pl6Ki6YOo6Zeo" class="departmentAction" method="pl6Ki6YOo6Zeo">
+			<result name="staffInfoPage">/staff/staffAdd.jsp</result>
+		</action>
+		<action name="*" class="staffAction" method="{1}">
+			<result name="loginOK">/index.jsp</result>
+			<result name="loginNO">/login.jsp</result>
+			<result name="findOK">/staff/staff.jsp</result>
+			<result name="OutOK">${request.contextPath}/login.jsp</result>
+			<!-- 指定（限制）上传文件的类型，定义局部拦截器，修改默认拦截器的属性 
+                "fileUpload.maximumSize" ：限制上传最大的文件大小。 
+                "fileUpload.allowedTypes"：允许上传文件的类型。 
+                "fileUpload.allowedExtensions"：允许上传文件的可扩展文件类型。
+            <interceptor-ref name="defaultStack">
+                <param name="fileUpload.maximumSize">500000000</param>
+                <param name="fileUpload.allowedTypes">text/plain,application/vnd.ms-powerpoint</param>
+                <param name="fileUpload.allowedExtensions">.txt,.ppt</param>
+            </interceptor-ref> -->
+			<result name="addStaffOK">/staff/staffAdd.jsp</result>
+			<result name="DepartmentHeadOK">/weekly/writeWeekly.jsp</result>
+			<result name="{1}" type="json"><param name="root">jsonObject</param></result>
+			
+			</action>
+			
+	</package>
+	<package name="department" namespace="/department" extends="json-default">
+			<action name="*" class="departmentAction" method="{1}">
+				<result name="PositionOK" type="json"><param name="root">jsonArray</param></result>
+			</action>
+	</package>
+	<package name="weekly" namespace="/weekly" extends="json-default">
+			<action name="*" class="weeklyAction" method="{1}">
+			<result name="{1}" type="json"><param name="root">jsonObject</param></result>
+			<result name="send">/weekly/writeWeekly.jsp</result>
+			<result name="reviewOK">/weekly/reviewWeekly.jsp</result>
+				</action>
+	</package>
+</struts>    

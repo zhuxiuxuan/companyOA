@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zxx.dao.impl.WeeklyDaoImpl">
+	<resultMap type="com.zxx.entity.Weekly" id="WeeklyMap">
+			<id property="weekly_id" column="weekly_id"/>
+			<result property="weekly_sender" column="weekly_sender"/>
+			<result property="weekly_recipient" column="weekly_recipient"/>
+			<result property="weekly_date" column="weekly_date"/>
+			<result property="weekly_complete" column="weekly_complete"/>
+			<result property="weekly_problem" column="weekly_problem"/>
+			<result property="weekly_plan" column="weekly_plan"/>
+			<result property="weekly_status" column="weekly_status"/>
+			<association property="senderInfo" column="info_id" javaType="com.zxx.entity.StaffInfo">
+			<id property="info_id" column="info_id"/>
+			<result property="info_name" column="info_name"/>
+			<result property="info_photo" column="info_photo"/>
+			<result property="info_entry" column="info_entry"/>
+			<result property="info_phone" column="info_phone"/>
+			<result property="info_WeChat" column="info_WeChat"/>
+			<result property="info_departmentId" column="info_department"/>
+			<result property="info_positionId" column="info_position"/>
+			<association property="info_department" column="d_id" javaType="com.zxx.entity.Department">
+				<id property="d_id" column="d_id"/>
+				<result property="d_name" column="d_name"/>
+			</association>
+			<association property="info_position" column="p_id" javaType="com.zxx.entity.Position">
+				<id property="p_id" column="p_id"/>
+				<result property="p_name" column="p_name"/>
+			</association>
+			</association>
+	</resultMap>
+	<insert id="add" parameterType="com.zxx.entity.Weekly">
+		insert into weekly_info(weekly_id,weekly_sender,weekly_recipient,weekly_date,weekly_complete,weekly_problem,weekly_plan,weekly_status) 
+		values(#{weekly_id},#{weekly_sender},#{weekly_recipient},#{weekly_date},#{weekly_complete},#{weekly_problem},#{weekly_plan},#{weekly_status})
+	</insert>
+	
+	<select id="findCount" resultType="int" parameterType="map">
+		select count(1) from weekly_info  
+		<where>
+			<if test="wRecipient != null and '' != wRecipient">
+				weekly_recipient = #{wRecipient} 
+			</if>
+			<if test="write_data != null and '' != write_data">
+				and weekly_date = #{write_data}
+			</if>
+		</where>
+	</select>
+	
+	<select id="find" resultMap="WeeklyMap" parameterType="map">
+		select * from weekly_info w left join staff_info i on w.weekly_sender = i.info_id LEFT JOIN department d on i.info_department = d.d_id LEFT JOIN position p on i.info_position = p.p_id 
+		<where>
+			<if test="wRecipient != null and '' != wRecipient">
+				weekly_recipient = #{wRecipient} 
+			</if>
+			<if test="write_data != null and '' != write_data">
+				and weekly_date = #{write_data}
+			</if>
+		</where>
+		<if test="pageSize != null and ''!= pageSize">
+			ORDER BY w.weekly_date DESC LIMIT #{bin},#{pageSize}
+		</if>
+	</select>
+ </mapper>
